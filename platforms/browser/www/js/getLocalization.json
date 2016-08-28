@@ -1,0 +1,13 @@
+// JavaScript Document
+getLocalization([
+	{
+		"USER ID": 1,
+		"LATITUDE": -23.670069,
+		"LONGITUDE": -46.490409
+	},
+	{
+		"USER ID": 2,
+		"LATITUDE": -23.670075,
+		"LONGITUDE": -46.490412
+	}
+])
