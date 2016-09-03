@@ -97,11 +97,13 @@ var app = {
     },
 	matchs: function() {
 		$(document).on('click','#btnNewMatch', this.onCreateMatchGET);
+		$(document).on('click','.btnEnterMatch', this.onEnterMatch);
 	},
 	onCreateMatchGET: function() {
 		var xmlhttp	= new XMLHttpRequest();
 		xmlhttp.open("GET","http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val(),false);
 		xmlhttp.send(null);
+		console.log(xmlhttp.responseText);
 		var result = $.parseJSON(xmlhttp.responseText);
 		if (result.error == 0) {
 			$("#logCreateMatch").html(":) Partida Criada");
@@ -109,5 +111,31 @@ var app = {
 		} else {
 			$("#logCreateMatch").html(":o Erro...Tente Novamente");
 		}
+	},
+	onEnterMatch: function() {
+		var xmlhttp2 = new XMLHttpRequest();
+		var linka = "http://192.168.0.14:3310/paintballmap/enterMatch.php?nickname2=" + $("#nickname2").val() + "?matchID=" + $("#matchID").val();
+		xmlhttp2.open("GET","http://192.168.0.14:3310/paintballmap/enterMatch.php?nickname2=" + $("#nickname2").val() + "&matchID=" + $("#matchID").val(), false);
+		xmlhttp2.send(null);
+		var result2 = $.parseJSON(xmlhttp2.responseText);
+		if (result2.error == 0) {
+			$("#logEnterMatch").html(":) Partida Valida");
+			$('#new_id_partida').val(result2.MatchID);
+			$.mobile.changePage("#map_page");
+		} else {
+			app.onErrorMsg(result2.error);
+		}
+	},
+	onErrorMsg: function(codeError) {
+		switch(codeError){
+			case '1':
+				$("#logEnterMatch").html(":o Erro...Tente Novamente");
+				break;
+			case '2':
+				console.log(codeError);
+				$("#logEnterMatch").html(":o Está partida não existe");
+				break;
+		}
+		return false;
 	}
 };

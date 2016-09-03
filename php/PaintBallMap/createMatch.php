@@ -1,4 +1,5 @@
 <?php
+	header("Access-Control-Allow-Origin: *");
 	include_once('db.php');
 
 	$PlayerID = mysqli_fetch_array(mysqli_query($conn, 'SELECT MAX(PlayerID) AS lastPlayerID FROM Matchs'));
@@ -18,7 +19,7 @@
 	$nickname = $_GET['nickname'];
 	
 	if (mysqli_query($conn, "INSERT INTO Matchs VALUES ('$PlayerID', '$MatchID', '$nickname', null, null)")) {
-		$array = array("error" => "0", "PlayerID" => $PlayerID, "MatchID" => $PlayerID);
+		$array = array("error" => "0", "PlayerID" => $PlayerID, "MatchID" => $MatchID);
 		echo json_encode($array);
 	} else {
 		$array = array("error" => "1");

@@ -31,7 +31,7 @@
             </div>
             <div data-role="main" class="ui-content">
             	<p class="ui-hide-label" id="logCreateMatch"></p>
-            	<form id="createMatch" action="" method="post">
+            	<form id="createMatch" action="" method="get">
                 	<label for="nick">Apelido</label>
                     <input type="text" name="nickname" id="nickname" />
                     <input type="button" value="Gerar Partida" id="btnNewMatch"/>
@@ -46,13 +46,14 @@
             	<a href="#home" class="ui-btn ui-icon-arrow-l ui-btn-icon-notext">Voltar</a>
             	<h1>PaintBall Map</h1>
             </div>
+            <p id="logEnterMatch"></p>
             <div data-role="main" class="ui-content">
-            	<form>
-                	<label for="nick2">Apelido</label>
-                    <input type="text" name="nick2" id="nick2" />
-                    <label for="id_partida">Id Partida</label>
-                    <input type="text" name="id_partida" id="id_partida" />
-                    <a href="#map_page" class="ui-btn">Entrar Partida</a>
+            	<form id="enterMatch" action="" method="post">
+                	<label for="nickname2">Apelido</label>
+                    <input type="text" name="nickname2" id="nickname2" />
+                    <label for="matchID">Id Partida</label>
+                    <input type="text" name="matchID" id="matchID" />
+                    <input type="button" class="btnEnterMatch" value="Entrar Partida" />
                 </form>
             </div>
         </div>
