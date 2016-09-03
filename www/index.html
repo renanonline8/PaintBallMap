@@ -30,12 +30,13 @@
             	<h1>PaintBall Map</h1>
             </div>
             <div data-role="main" class="ui-content">
-            	<form>
+            	<p class="ui-hide-label" id="logCreateMatch"></p>
+            	<form id="createMatch" action="" method="post">
                 	<label for="nick">Apelido</label>
-                    <input type="text" name="nick" id="nick" />
-                    <input type="button" value="Gerar Partida" />
+                    <input type="text" name="nickname" id="nickname" />
+                    <input type="button" value="Gerar Partida" id="btnNewMatch"/>
                     <label for="id_partida">Id Partida</label>
-                    <input type="text" name="id_partida" id="id_partida" />
+                    <input type="text" name="new_id_partida" id="new_id_partida" />
                     <a href="#map_page" class="ui-btn">Iniciar Partida</a>
                 </form>
             </div>

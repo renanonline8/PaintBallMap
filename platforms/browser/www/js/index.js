@@ -20,6 +20,7 @@ var app = {
     // Application Constructor
     initialize: function () {
         this.bindEvents();
+		this.matchs();
     },
     // Bind Event Listeners
     //
@@ -27,14 +28,13 @@ var app = {
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function () {
         document.addEventListener('deviceready', this.onDeviceReady, false);
-		
     },
     // deviceready Event Handler
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function () {
-        app.receivedEvent('deviceready');
+        //app.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {
@@ -95,4 +95,19 @@ var app = {
     onError: function (error) {
         alert(error.message);
     },
+	matchs: function() {
+		$(document).on('click','#btnNewMatch', this.onCreateMatchGET);
+	},
+	onCreateMatchGET: function() {
+		var xmlhttp	= new XMLHttpRequest();
+		xmlhttp.open("GET","http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val(),false);
+		xmlhttp.send(null);
+		var result = $.parseJSON(xmlhttp.responseText);
+		if (result.error == 0) {
+			$("#logCreateMatch").html(":) Partida Criada");
+			$('#new_id_partida').val(result.MatchID);
+		} else {
+			$("#logCreateMatch").html(":o Erro...Tente Novamente");
+		}
+	}
 };
