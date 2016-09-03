@@ -7,12 +7,12 @@
         <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
         <param name="onload" value="true" />
     </feature>
-    <name>HelloCordova</name>
+    <name>PaintBallMap</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        Prototipo da ideia de app Paint Ball Map
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
+    <author email="renan@sbg.com.br" href="">
+        Renan Santos Gomes / Hudson Kanegae
     </author>
     <content src="index.html" />
     <access origin="*" />

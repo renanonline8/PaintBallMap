@@ -1,9 +1,10 @@
 ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>A jQWidgets mobile application, which demonstrates PhoneGap's Geolocation API.
-    </title>
+    <title>PaintBall Map</title>
     <link rel="Stylesheet" type="text/css" href="css/jqx.base.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons-1.4.5.min.css" />
     <style type="text/css">
         .label
         {
@@ -11,8 +12,79 @@
             font-weight: bold;
         }
     </style>
-    <script type="text/javascript" src="cordova.js"></script>
+</head>
+<body>
+    <div class="app">
+    	<div id="home" data-role="page">
+        	<div data-role="header">
+            	<h1>PaintBall Map</h1>
+            </div>
+        	<div data-role="main" class="ui-content">
+                <a href="#nova_partida" class="ui-btn">Nova Partida</a>
+                <a href="#entrar_partida" class="ui-btn">Entrar na Partida</a>
+            </div>
+        </div>
+        <div id="nova_partida" data-role="page">
+        	<div data-role="header">
+            	<a href="#home" class="ui-btn ui-icon-arrow-l ui-btn-icon-notext">Voltar</a>
+            	<h1>PaintBall Map</h1>
+            </div>
+            <div data-role="main" class="ui-content">
+            	<form>
+                	<label for="nick">Apelido</label>
+                    <input type="text" name="nick" id="nick" />
+                    <input type="button" value="Gerar Partida" />
+                    <label for="id_partida">Id Partida</label>
+                    <input type="text" name="id_partida" id="id_partida" />
+                    <a href="#map_page" class="ui-btn">Iniciar Partida</a>
+                </form>
+            </div>
+        </div>
+        <div id="entrar_partida" data-role="page">
+        	<div data-role="header">
+            	<a href="#home" class="ui-btn ui-icon-arrow-l ui-btn-icon-notext">Voltar</a>
+            	<h1>PaintBall Map</h1>
+            </div>
+            <div data-role="main" class="ui-content">
+            	<form>
+                	<label for="nick2">Apelido</label>
+                    <input type="text" name="nick2" id="nick2" />
+                    <label for="id_partida">Id Partida</label>
+                    <input type="text" name="id_partida" id="id_partida" />
+                    <a href="#map_page" class="ui-btn">Entrar Partida</a>
+                </form>
+            </div>
+        </div>
+        <div id="map_page" data-role="page">
+        	<div data-role="header">
+            	<h1>PaintBall Map</h1>
+            </div>
+            <div data-role="main" class="ui-content">
+                <div id="jqxTabs" style="width:100%;">
+                    <ul style='margin-left: 20px;'>
+                        <li>Location Map</li>
+                        <li>Location Details</li>
+                    </ul>
+                    <div>
+                        <div id="map" style="width: 100%; height: 320px;">
+                        </div>
+                    </div>
+                    <div>
+                        <div id="details">
+                            <span class="label">Latitude: </span><span id="latitude"></span>;
+                            <br />
+                            <span class="label">Longitude: </span><span id="longitude"></span>.
+                        </div>
+                    </div>
+                </div>
+            	<a href="#home" class="ui-btn">Sair</a>
+        	</div>
+        </div>
+    </div>
+</body>
+	<script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
     <script type="text/javascript" src="js/jqxcore.js"></script>
     <script type="text/javascript" src="js/jqxtabs.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
@@ -22,26 +94,4 @@
             app.initialize();
         });
     </script>
-</head>
-<body>
-    <div class="app">
-        <div id="jqxTabs">
-            <ul style='margin-left: 20px;'>
-                <li>Location Map</li>
-                <li>Location Details</li>
-            </ul>
-            <div>
-                <div id="map" style="width: 350px; height: 320px;">
-                </div>
-            </div>
-            <div>
-                <div id="details">
-                    <span class="label">Latitude: </span><span id="latitude"></span>;
-                    <br />
-                    <span class="label">Longitude: </span><span id="longitude"></span>.
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
 </html>
