@@ -34,7 +34,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function () {
-        //app.receivedEvent('deviceready');
+        app.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {
@@ -51,6 +51,12 @@ var app = {
     onSuccess: function (position) {
         var lat = position.coords.latitude;
         var lng = position.coords.longitude;
+		var playerID = localStorage.getItem("PlayerID");
+		var url = "http://192.168.0.14:3310/paintballmap/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
+		console.log(url);
+		var positionHttp = new XMLHttpRequest();
+		positionHttp.open("GET",url,false);
+		positionHttp.send(null);
         $("#latitude").text(lat);
         $("#longitude").text(lng);
         // initializes the map
@@ -103,11 +109,11 @@ var app = {
 		var xmlhttp	= new XMLHttpRequest();
 		xmlhttp.open("GET","http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val(),false);
 		xmlhttp.send(null);
-		console.log(xmlhttp.responseText);
 		var result = $.parseJSON(xmlhttp.responseText);
 		if (result.error == 0) {
 			$("#logCreateMatch").html(":) Partida Criada");
 			$('#new_id_partida').val(result.MatchID);
+			localStorage.setItem("PlayerID", result.PlayerID);
 		} else {
 			$("#logCreateMatch").html(":o Erro...Tente Novamente");
 		}
@@ -121,6 +127,7 @@ var app = {
 		if (result2.error == 0) {
 			$("#logEnterMatch").html(":) Partida Valida");
 			$('#new_id_partida').val(result2.MatchID);
+			localStorage.setItem("PlayerID", result2.PlayerID);
 			$.mobile.changePage("#map_page");
 		} else {
 			app.onErrorMsg(result2.error);
