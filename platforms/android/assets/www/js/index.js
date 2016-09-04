@@ -38,20 +38,23 @@ var app = {
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {
-				
+		app.getPosition();
+		//$(document).on('click','#refreshPosition',app.onClearMarkers(a.marker, otherMarkers, map));
+		
+    },
+	getPosition: function() {
+		this.teste = 'teste';
 		var options = {
     		timeout: 30000
 		};
-		navigator.geolocation.getCurrentPosition(this.onSuccess, this.onError, options);
-		
-    },
+		navigator.geolocation.getCurrentPosition(app.onSuccess, app.onError, options);
+	},
     // successfully determined position
     onSuccess: function (position) {
         var lat = position.coords.latitude;
         var lng = position.coords.longitude;
 		var playerID = localStorage.getItem("PlayerID");
 		var url = "http://192.168.0.14:3310/paintballmap/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
-		console.log(url);
 		var positionHttp = new XMLHttpRequest();
 		positionHttp.open("GET",url,false);
 		positionHttp.send(null);
@@ -59,13 +62,12 @@ var app = {
 		// initializes the map
         var myLocation = new google.maps.LatLng(lat, lng);
 		
-		if (typeof(map) == "undefined") {
-			var map = new google.maps.Map(document.getElementById('map'), {
+			map = new google.maps.Map(document.getElementById('map'), {
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				center: myLocation,
 				zoom: 100
 			});
-		}
+			
 		
 		if (typeof(marker) == "undefined") {
 			var marker = new google.maps.Marker({
@@ -73,27 +75,17 @@ var app = {
 				map: map,
 				title: 'Olá Mundo'
 			});
+			
 		}
 		
+		var otherMarkers
 		google.maps.event.addListenerOnce(map, 'idle', function(){
-			app.onCreateMarkers(map);
+			otherMarkers = new app.onCreateMarkers(map);
+			$(document).on('click','#refreshPosition',function(){
+				app.onClearMarkers(marker, otherMarkers.otherMarkers, map);
+				app.getPosition();
+			});
 		});
-		
-		/*var text = '{"getLocalization":[' +
-		'{"userID":"1","latitude":"-23.670069","longitude":"-46.490409"},' +
-		'{"userID":"2","latitude":"-23.670075","longitude":"-46.490412"}]}';
-		
-		obj = JSON.parse(text);
-		$.each(obj, function(name, value){
-			$.each(this, function (index, value) {
-				var otherMarker = [];
-				otherMarker[index] = new google.maps.Marker({
-					position: {lat:Number(this.latitude), lng:Number(this.longitude)},
-					map: map,
-					icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-				});
-   			});
-		});*/
 		
     },
     // unsuccessfully determined position
@@ -140,7 +132,6 @@ var app = {
 				$("#logEnterMatch").html(":o Erro...Tente Novamente");
 				break;
 			case '2':
-				console.log(codeError);
 				$("#logEnterMatch").html(":o Está partida não existe");
 				break;
 		}
@@ -150,21 +141,31 @@ var app = {
 		var matchID = localStorage.getItem('MatchID');
 		var playerID = localStorage.getItem('PlayerID');
 		var url = "http://192.168.0.14:3310/paintballmap/getPosition.php?MatchId=" + matchID + "&PlayerID=" + playerID;
-		console.log(url + ", " + playerID + ", " + matchID);
+		var otherMarkers = []
 		$.getJSON(url,function(result){
-			console.log(result);	
 			$.each(result, function(i, field) {
 				var otherP = field.PlayerID;
 				var otherPnick = field.Nickname;
 				var otherPlat = field.Latitude;
 				var otherPlon = field.Longitude;
-				console.log("Player ID: " + otherP + ", Nick:" + otherPnick + ", Lat: " + otherPlat + ", Lon: " + otherPlon);
 				var otherMark = new google.maps.Marker({
 					position: {lat:Number(otherPlat), lng:Number(otherPlon)},
 					map: obj,
 					icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'				
 				});
+				otherMarkers.push(otherMark);
 			});
 		});
+		this.otherMarkers = otherMarkers;
+	},
+	onClearMarkers: function(playerMarker, otherMarkers, map) {
+		var playerMarker = playerMarker;
+		var otherMarkers = otherMarkers;
+		playerMarker.setMap(null);
+		for (var i = 0; i < otherMarkers.length; i++){
+			otherMarkers[i].setMap(null);
+		}
+		playerMarker = null;
+		otherMarkers = [];
 	}
 };
