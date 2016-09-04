@@ -62,38 +62,22 @@
             	<h1>PaintBall Map</h1>
             </div>
             <div data-role="main" class="ui-content">
-                <div id="jqxTabs" style="width:100%;">
-                    <ul style='margin-left: 20px;'>
-                        <li>Location Map</li>
-                        <li>Location Details</li>
-                    </ul>
-                    <div>
-                        <div id="map" style="width: 100%; height: 320px;">
-                        </div>
-                    </div>
-                    <div>
-                        <div id="details">
-                            <span class="label">Latitude: </span><span id="latitude"></span>;
-                            <br />
-                            <span class="label">Longitude: </span><span id="longitude"></span>.
-                        </div>
-                    </div>
+               	<div id="map" style="width: 100%; height: 320px;">
                 </div>
-            	<a href="#home" class="ui-btn">Sair</a>
+                <input type="button" id="refreshPosition" value="Atualiza Posição" />
+            	<input type="button" id="exitMatch" value="Sair" />
         	</div>
         </div>
     </div>
 </body>
-	<script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
-    <script type="text/javascript" src="js/jqxcore.js"></script>
-    <script type="text/javascript" src="js/jqxtabs.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHM-kUpPsclu5uMRxNEoERh0t-bnfiMTI&sensor=false"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            app.initialize();
-        });
-    </script>
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHM-kUpPsclu5uMRxNEoERh0t-bnfiMTI&sensor=false"></script>
+<script type="text/javascript">
+	$(document).ready(function () {
+		app.initialize();
+    });
+</script>
 </html>

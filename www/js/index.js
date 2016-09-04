@@ -38,13 +38,11 @@ var app = {
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {
-        // create jqxtabs.
-        $('#jqxTabs').jqxTabs({ width: 350, height: 350 });
-		
+				
 		var options = {
     		timeout: 30000
 		};
-		var watchPos = navigator.geolocation.watchPosition(this.onSuccess, this.onError, options);
+		navigator.geolocation.getCurrentPosition(this.onSuccess, this.onError, options);
 		
     },
     // successfully determined position
@@ -57,9 +55,8 @@ var app = {
 		var positionHttp = new XMLHttpRequest();
 		positionHttp.open("GET",url,false);
 		positionHttp.send(null);
-        $("#latitude").text(lat);
-        $("#longitude").text(lng);
-        // initializes the map
+		        
+		// initializes the map
         var myLocation = new google.maps.LatLng(lat, lng);
 		
 		if (typeof(map) == "undefined") {
@@ -78,9 +75,11 @@ var app = {
 			});
 		}
 		
-		marker.setPosition(myLocation);
+		google.maps.event.addListenerOnce(map, 'idle', function(){
+			app.onCreateMarkers(map);
+		});
 		
-		var text = '{"getLocalization":[' +
+		/*var text = '{"getLocalization":[' +
 		'{"userID":"1","latitude":"-23.670069","longitude":"-46.490409"},' +
 		'{"userID":"2","latitude":"-23.670075","longitude":"-46.490412"}]}';
 		
@@ -94,7 +93,7 @@ var app = {
 					icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
 				});
    			});
-		});
+		});*/
 		
     },
     // unsuccessfully determined position
@@ -114,6 +113,7 @@ var app = {
 			$("#logCreateMatch").html(":) Partida Criada");
 			$('#new_id_partida').val(result.MatchID);
 			localStorage.setItem("PlayerID", result.PlayerID);
+			localStorage.setItem("MatchID", result.MatchID);
 		} else {
 			$("#logCreateMatch").html(":o Erro...Tente Novamente");
 		}
@@ -128,6 +128,7 @@ var app = {
 			$("#logEnterMatch").html(":) Partida Valida");
 			$('#new_id_partida').val(result2.MatchID);
 			localStorage.setItem("PlayerID", result2.PlayerID);
+			localStorage.setItem("MatchID", result2	.MatchID);
 			$.mobile.changePage("#map_page");
 		} else {
 			app.onErrorMsg(result2.error);
@@ -144,5 +145,26 @@ var app = {
 				break;
 		}
 		return false;
+	},
+	onCreateMarkers: function(obj) {
+		var matchID = localStorage.getItem('MatchID');
+		var playerID = localStorage.getItem('PlayerID');
+		var url = "http://192.168.0.14:3310/paintballmap/getPosition.php?MatchId=" + matchID + "&PlayerID=" + playerID;
+		console.log(url + ", " + playerID + ", " + matchID);
+		$.getJSON(url,function(result){
+			console.log(result);	
+			$.each(result, function(i, field) {
+				var otherP = field.PlayerID;
+				var otherPnick = field.Nickname;
+				var otherPlat = field.Latitude;
+				var otherPlon = field.Longitude;
+				console.log("Player ID: " + otherP + ", Nick:" + otherPnick + ", Lat: " + otherPlat + ", Lon: " + otherPlon);
+				var otherMark = new google.maps.Marker({
+					position: {lat:Number(otherPlat), lng:Number(otherPlon)},
+					map: obj,
+					icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'				
+				});
+			});
+		});
 	}
 };
