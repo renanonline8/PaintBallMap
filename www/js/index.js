@@ -116,7 +116,9 @@ var app = {
 	},
 	onCreateMatchGET: function() {
 		var xmlhttp	= new XMLHttpRequest();
-		xmlhttp.open("GET","http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val(),false);
+		var idMapa = $('#id_map').val();
+		console.log("http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa);
+		xmlhttp.open("GET","http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa, false);
 		xmlhttp.send(null);
 		var result = $.parseJSON(xmlhttp.responseText);
 		if (result.error == 0) {
@@ -124,6 +126,7 @@ var app = {
 			$('#new_id_partida').val(result.MatchID);
 			localStorage.setItem("PlayerID", result.PlayerID);
 			localStorage.setItem("MatchID", result.MatchID);
+			localStorage.setItem("MapID", result.MapID);
 		} else {
 			$("#logCreateMatch").html(":o Erro...Tente Novamente");
 		}

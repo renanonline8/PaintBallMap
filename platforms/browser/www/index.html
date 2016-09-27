@@ -27,13 +27,15 @@
         <div id="nova_partida" data-role="page">
         	<div data-role="header">
             	<a href="#home" class="ui-btn ui-icon-arrow-l ui-btn-icon-notext">Voltar</a>
-            	<h1>PaintBall Map</h1>
+            	<h1>Nova Partida</h1>
             </div>
             <div data-role="main" class="ui-content">
             	<p class="ui-hide-label" id="logCreateMatch"></p>
             	<form id="createMatch" action="" method="get">
                 	<label for="nick">Apelido</label>
                     <input type="text" name="nickname" id="nickname" />
+                    <label for="id_map">Mapa</label>
+                    <input type="number" name="id_map" id="id_map" />
                     <input type="button" value="Gerar Partida" id="btnNewMatch"/>
                     <label for="id_partida">Id Partida</label>
                     <input type="text" name="new_id_partida" id="new_id_partida" />
@@ -44,7 +46,7 @@
         <div id="entrar_partida" data-role="page">
         	<div data-role="header">
             	<a href="#home" class="ui-btn ui-icon-arrow-l ui-btn-icon-notext">Voltar</a>
-            	<h1>PaintBall Map</h1>
+            	<h1>Entrar na Partida</h1>
             </div>
             <p id="logEnterMatch"></p>
             <div data-role="main" class="ui-content">

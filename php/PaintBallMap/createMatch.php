@@ -17,13 +17,14 @@
 		$MatchID = (int)$MatchID + 1;
 	
 	$nickname = $_GET['nickname'];
+	$map_ID = $_GET['idMap'];
 	
-	if (mysqli_query($conn, "INSERT INTO Matchs VALUES ('$PlayerID', '$MatchID', '$nickname', null, null)")) {
-		$array = array("error" => "0", "PlayerID" => $PlayerID, "MatchID" => $MatchID);
+	if (mysqli_query($conn, "INSERT INTO Matchs VALUES ('$PlayerID', '$MatchID', '$nickname', null, null, '$map_ID')")) {
+		$array = array("error" => "0", "PlayerID" => $PlayerID, "MatchID" => $MatchID, "MapID" => $map_ID);
 		echo json_encode($array);
 	} else {
 		$array = array("error" => "1");
-		echo json_encode($array);
+		echo json_encode($map_ID);
 	}
 	mysqli_close($conn);
 ?>
