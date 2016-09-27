@@ -62,12 +62,33 @@ var app = {
 		// initializes the map
         var myLocation = new google.maps.LatLng(lat, lng);
 		
-			map = new google.maps.Map(document.getElementById('map'), {
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
-				center: myLocation,
-				zoom: 100
-			});
+		map = new google.maps.Map(document.getElementById('map'), {
+			mapTypeId: google.maps.MapTypeId.ROADMAP,
+			center: myLocation,
+			zoom: 100
+		});
+		
+		//Definir LatLng dos poligonos, sentido hor
+		ário
+		var fieldAreaCoords = [
+			{lat: -23.670067, lng: -46.489367},
+			{lat: -23.669970, lng: -46.490266},
+			{lat: -23.669589, lng: -46.490875},
+			{lat: -23.670049, lng: -46.491231},
+			{lat: -23.670609, lng: -46.490448},
+			{lat: -23.670619, lng: -46.489440}
+		];
 			
+		//Desenhar polígono
+		var fieldArea = new google.maps.Polygon({
+			paths: fieldAreaCoords,
+			strokeColor: '#FF0000',
+			strokeOpacity: 0.8,
+			strokeWeight: 2,
+			fillColor: '#FF0000',
+			fillOpacity: 0.35
+		});
+		fieldArea.setMap(map);	
 		
 		if (typeof(marker) == "undefined") {
 			var marker = new google.maps.Marker({
