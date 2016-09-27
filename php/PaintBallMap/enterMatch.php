@@ -6,7 +6,7 @@
 	$PlayerID = $PlayerID['lastPlayerID'];
 	if ($PlayerID == ''){
 		$PlayerID = 1;
-	}else
+	} else
 		$PlayerID = (int)$PlayerID + 1;
 		
 	$MatchID = $_GET['matchID'];

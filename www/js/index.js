@@ -68,8 +68,7 @@ var app = {
 			zoom: 100
 		});
 		
-		//Definir LatLng dos poligonos, sentido hor
-		ário
+		//Definir LatLng dos poligonos, sentido horário
 		var fieldAreaCoords = [
 			{lat: -23.670067, lng: -46.489367},
 			{lat: -23.669970, lng: -46.490266},
@@ -96,7 +95,6 @@ var app = {
 				map: map,
 				title: 'Olá Mundo'
 			});
-			
 		}
 		
 		var otherMarkers
@@ -107,7 +105,6 @@ var app = {
 				app.getPosition();
 			});
 		});
-		
     },
     // unsuccessfully determined position
     onError: function (error) {
