@@ -142,6 +142,7 @@ var app = {
 			$('#new_id_partida').val(result2.MatchID);
 			localStorage.setItem("PlayerID", result2.PlayerID);
 			localStorage.setItem("MatchID", result2	.MatchID);
+			localStorage.setItem("MapID", result2.MapID);
 			$.mobile.changePage("#map_page");
 		} else {
 			app.onErrorMsg(result2.error);
