@@ -34,13 +34,13 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function () {
+		urlAPI = "http://localhost:3310/paintballmap/";
+		//this.urlAPI = "http://paintballmap.azurewebsites.net/api/";
         app.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {
-		app.getPosition();
-		//$(document).on('click','#refreshPosition',app.onClearMarkers(a.marker, otherMarkers, map));
-		
+		app.getPosition();		
     },
 	getPosition: function() {
 		this.teste = 'teste';
@@ -54,40 +54,54 @@ var app = {
         var lat = position.coords.latitude;
         var lng = position.coords.longitude;
 		var playerID = localStorage.getItem("PlayerID");
-		var url = "http://192.168.0.14:3310/paintballmap/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
+		var url = "http://paintballmap.azurewebsites.net/api/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
 		var positionHttp = new XMLHttpRequest();
+		var mapID = this.mapID;
+		this.mapID = localStorage.getItem("MapID");
 		positionHttp.open("GET",url,false);
 		positionHttp.send(null);
 		        
 		// initializes the map
         var myLocation = new google.maps.LatLng(lat, lng);
-		
 		map = new google.maps.Map(document.getElementById('map'), {
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 			center: myLocation,
 			zoom: 100
 		});
 		
-		//Definir LatLng dos poligonos, sentido horário
-		var fieldAreaCoords = [
-			{lat: -23.670067, lng: -46.489367},
-			{lat: -23.669970, lng: -46.490266},
-			{lat: -23.669589, lng: -46.490875},
-			{lat: -23.670049, lng: -46.491231},
-			{lat: -23.670609, lng: -46.490448},
-			{lat: -23.670619, lng: -46.489440}
-		];
-			
-		//Desenhar polígono
-		var fieldArea = new google.maps.Polygon({
-			paths: fieldAreaCoords,
-			strokeColor: '#FF0000',
-			strokeOpacity: 0.8,
-			strokeWeight: 2,
-			fillColor: '#FF0000',
-			fillOpacity: 0.35
+		/*
+		1. Verificar a partida tem mapa
+		2. Se tiver, verificar se o mapa existe
+		3. Se tiver, desenhar o mapa		
+		*/
+		var url = urlAPI+"getMapMatch.php?PlayerID=" + playerID;
+		var mapIDBD;
+		var jqxhr = $.getJSON(url,function(result){
+			$.each(result, function(key, field){
+				mapIDBD = field.MapID;
+			});
 		});
-		fieldArea.setMap(map);	
+		jqxhr.complete(function(){
+			if (mapIDBD != this.mapID) {
+				localStorage.setItem("MapID", mapIDBD);
+				this.mapID = localStorage.getItem("MapID");
+			}
+			var hasMap = true;
+			if (this.mapID == null){
+				hasMap = false;
+			}
+			var url = "http://paintballmap.azurewebsites.net/api/getMapLatLng.php?MapID=" + this.mapID;
+			var jqxhrHasMap = $.getJSON(url, function(data){
+				return data;
+			});
+			jqxhrHasMap.complete(function(){
+				if(jqxhrHasMap.responseText == '[]')
+					hasMap = false;
+				console.log(hasMap);
+				if (hasMap == true)
+					app.onDrawMap(map, jqxhrHasMap.responseText);
+			});
+		});	
 		
 		if (typeof(marker) == "undefined") {
 			var marker = new google.maps.Marker({
@@ -117,8 +131,8 @@ var app = {
 	onCreateMatchGET: function() {
 		var xmlhttp	= new XMLHttpRequest();
 		var idMapa = $('#id_map').val();
-		console.log("http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa);
-		xmlhttp.open("GET","http://192.168.0.14:3310/paintballmap/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa, false);
+		console.log("http://paintballmap.azurewebsites.net/api/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa);
+		xmlhttp.open("GET",urlAPI + "createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa, false);
 		xmlhttp.send(null);
 		var result = $.parseJSON(xmlhttp.responseText);
 		if (result.error == 0) {
@@ -133,7 +147,8 @@ var app = {
 	},
 	onEnterMatch: function() {
 		var xmlhttp2 = new XMLHttpRequest();
-		var linka = "http://192.168.0.14:3310/paintballmap/enterMatch.php?nickname2=" + $("#nickname2").val() + "?matchID=" + $("#matchID").val();
+		var linka = "http://paintballmap.azurewebsites.net/api/enterMatch.php?nickname2=" + $("#nickname2").val() + "?matchID=" + $("#matchID").val();
+		console.log(linka);
 		xmlhttp2.open("GET","http://192.168.0.14:3310/paintballmap/enterMatch.php?nickname2=" + $("#nickname2").val() + "&matchID=" + $("#matchID").val(), false);
 		xmlhttp2.send(null);
 		var result2 = $.parseJSON(xmlhttp2.responseText);
@@ -162,7 +177,7 @@ var app = {
 	onCreateMarkers: function(obj) {
 		var matchID = localStorage.getItem('MatchID');
 		var playerID = localStorage.getItem('PlayerID');
-		var url = "http://192.168.0.14:3310/paintballmap/getPosition.php?MatchId=" + matchID + "&PlayerID=" + playerID;
+		var url = "http://paintballmap.azurewebsites.net/api/getPosition.php?MatchId=" + matchID + "&PlayerID=" + playerID;
 		var otherMarkers = []
 		$.getJSON(url,function(result){
 			$.each(result, function(i, field) {
@@ -189,5 +204,25 @@ var app = {
 		}
 		playerMarker = null;
 		otherMarkers = [];
+	},
+	onDrawMap: function(map, points){
+		//Definir LatLng dos poligonos, sentido horário
+		console.log(points);
+		var fieldAreaCoords = eval('(' + points + ')');
+		console.log('oi');
+		$.each(fieldAreaCoords, function(index, val){
+			val.lat = Number(val.lat);
+			val.lng = Number(val.lng);
+		});
+		//Desenhar polígono
+		var fieldArea = new google.maps.Polygon({
+			paths: fieldAreaCoords,
+			strokeColor: '#FF0000',
+			strokeOpacity: 0.8,
+			strokeWeight: 2,
+			fillColor: '#FF0000',
+			fillOpacity: 0.35
+		});
+		fieldArea.setMap(map);	
 	}
 };
