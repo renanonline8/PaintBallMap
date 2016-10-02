@@ -54,27 +54,24 @@ var app = {
         var lat = position.coords.latitude;
         var lng = position.coords.longitude;
 		var playerID = localStorage.getItem("PlayerID");
-		var url = "http://paintballmap.azurewebsites.net/api/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
-		var positionHttp = new XMLHttpRequest();
 		var mapID = this.mapID;
 		this.mapID = localStorage.getItem("MapID");
-		positionHttp.open("GET",url,false);
-		positionHttp.send(null);
-		        
+		var url = "http://paintballmap.azurewebsites.net/api/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
+		var jqCurrentPosition = $.getJSON(url, function(data){});
+		jqCurrentPosition.fail(function(){
+			alert('Sem conexão com o servidor');
+		});
+		jqCurrentPosition.complete(function(data){
+			console.log('Informação Enviada');
+		});		        
 		// initializes the map
         var myLocation = new google.maps.LatLng(lat, lng);
 		map = new google.maps.Map(document.getElementById('map'), {
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 			center: myLocation,
 			zoom: 100
-		});
-		
-		/*
-		1. Verificar a partida tem mapa
-		2. Se tiver, verificar se o mapa existe
-		3. Se tiver, desenhar o mapa		
-		*/
-		var url = urlAPI+"getMapMatch.php?PlayerID=" + playerID;
+		});		
+		var url = "http://paintballmap.azurewebsites.net/api/getMapMatch.php?PlayerID=" + playerID;
 		var mapIDBD;
 		var jqxhr = $.getJSON(url,function(result){
 			$.each(result, function(key, field){
@@ -127,41 +124,53 @@ var app = {
 	matchs: function() {
 		$(document).on('click','#btnNewMatch', this.onCreateMatchGET);
 		$(document).on('click','.btnEnterMatch', this.onEnterMatch);
+		$(document).on('click','#exitMatch', app.onExitMatch);
 	},
 	onCreateMatchGET: function() {
-		var xmlhttp	= new XMLHttpRequest();
 		var idMapa = $('#id_map').val();
-		console.log("http://paintballmap.azurewebsites.net/api/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa);
-		xmlhttp.open("GET",urlAPI + "createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa, false);
-		xmlhttp.send(null);
-		var result = $.parseJSON(xmlhttp.responseText);
-		if (result.error == 0) {
-			$("#logCreateMatch").html(":) Partida Criada");
-			$('#new_id_partida').val(result.MatchID);
-			localStorage.setItem("PlayerID", result.PlayerID);
-			localStorage.setItem("MatchID", result.MatchID);
-			localStorage.setItem("MapID", result.MapID);
-		} else {
-			$("#logCreateMatch").html(":o Erro...Tente Novamente");
-		}
+		var url = "http://paintballmap.azurewebsites.net/api/createMatch.php?nickname=" + $("#nickname").val() + "&idMap=" + idMapa;
+		console.log(url);
+		var jqCreateMatch = $.getJSON(url, function(data){});
+		jqCreateMatch.fail(function(){
+			$("#logCreateMatch").html(":o Servidor indisponível");
+		});
+		jqCreateMatch.complete(function(data){
+			$.each(data, function(index, field){
+				if (field.error == 0) {
+					$("#logCreateMatch").html(":) Partida Criada");
+					$('#new_id_partida').val(field.MatchID);
+					localStorage.setItem("PlayerID", field.PlayerID);
+					localStorage.setItem("MatchID", field.MatchID);
+					localStorage.setItem("MapID", field.MapID);
+				} else {
+					$("#logCreateMatch").html(":o Erro...Tente Novamente");
+				}
+			});
+		});
 	},
 	onEnterMatch: function() {
-		var xmlhttp2 = new XMLHttpRequest();
-		var linka = "http://paintballmap.azurewebsites.net/api/enterMatch.php?nickname2=" + $("#nickname2").val() + "?matchID=" + $("#matchID").val();
+		var linka = "http://paintballmap.azurewebsites.net/api/enterMatch.php?nickname2=" + $("#nickname2").val() + "&matchID=" + $("#matchID").val();
 		console.log(linka);
-		xmlhttp2.open("GET","http://192.168.0.14:3310/paintballmap/enterMatch.php?nickname2=" + $("#nickname2").val() + "&matchID=" + $("#matchID").val(), false);
-		xmlhttp2.send(null);
-		var result2 = $.parseJSON(xmlhttp2.responseText);
-		if (result2.error == 0) {
-			$("#logEnterMatch").html(":) Partida Valida");
-			$('#new_id_partida').val(result2.MatchID);
-			localStorage.setItem("PlayerID", result2.PlayerID);
-			localStorage.setItem("MatchID", result2	.MatchID);
-			localStorage.setItem("MapID", result2.MapID);
-			$.mobile.changePage("#map_page");
-		} else {
-			app.onErrorMsg(result2.error);
-		}
+		var jqEnterMatch = $.getJSON(linka, function(data) {
+			console.log("success");
+		});
+		jqEnterMatch.fail(function(){
+			app.onErrorMsg('3');
+		});
+		jqEnterMatch.complete(function(data){
+			$.each(data, function(index, field){
+				if (field.error == 0) {
+					$("#logEnterMatch").html(":) Partida Valida");
+					$('#new_id_partida').val(field.MatchID);
+					localStorage.setItem("PlayerID", field.PlayerID);
+					localStorage.setItem("MatchID", field.MatchID);
+					localStorage.setItem("MapID", field.MapID);
+					$.mobile.changePage("#map_page");
+				} else {
+					app.onErrorMsg(field.error);
+				}
+			});
+		});
 	},
 	onErrorMsg: function(codeError) {
 		switch(codeError){
@@ -171,6 +180,8 @@ var app = {
 			case '2':
 				$("#logEnterMatch").html(":o Está partida não existe");
 				break;
+			case '3':
+				$("#logEnterMatch").html(":o Servidor indisponível");
 		}
 		return false;
 	},
@@ -209,7 +220,6 @@ var app = {
 		//Definir LatLng dos poligonos, sentido horário
 		console.log(points);
 		var fieldAreaCoords = eval('(' + points + ')');
-		console.log('oi');
 		$.each(fieldAreaCoords, function(index, val){
 			val.lat = Number(val.lat);
 			val.lng = Number(val.lng);
@@ -224,5 +234,8 @@ var app = {
 			fillOpacity: 0.35
 		});
 		fieldArea.setMap(map);	
+	},
+	onExitMatch: function() {
+		$.mobile.changePage("#home");
 	}
 };
