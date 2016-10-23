@@ -20,7 +20,7 @@ var app = {
     // Application Constructor
     initialize: function () {
         this.bindEvents();
-		this.matchs();
+		//this.matchs();
     },
     // Bind Event Listeners
     //
@@ -34,13 +34,12 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function () {
-		urlAPI = "http://localhost:3310/paintballmap/";
-		//this.urlAPI = "http://paintballmap.azurewebsites.net/api/";
         app.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function (id) {
-		app.getPosition();		
+		//app.getPosition();
+		this.matchs();
     },
 	getPosition: function() {
 		this.teste = 'teste';
@@ -58,6 +57,7 @@ var app = {
 		this.mapID = localStorage.getItem("MapID");
 		var url = "http://paintballmap.azurewebsites.net/api/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
 		var jqCurrentPosition = $.getJSON(url, function(data){});
+		var wasDrawMap = this.wasDrawMap;
 		jqCurrentPosition.fail(function(){
 			alert('Sem conexão com o servidor');
 		});
@@ -94,18 +94,38 @@ var app = {
 			jqxhrHasMap.complete(function(){
 				if(jqxhrHasMap.responseText == '[]')
 					hasMap = false;
-				console.log(hasMap);
-				if (hasMap == true)
-					app.onDrawMap(map, jqxhrHasMap.responseText);
+				if (hasMap == true) {
+					if (typeof(this.matchMap) == "undefined") {
+						var matchMap = new app.onDrawMap(map, jqxhrHasMap.responseText);
+					} else {
+						//...
+					}
+				}
 			});
 		});	
-		
-		if (typeof(marker) == "undefined") {
+		/*if (typeof(marker) == "undefined") {
 			var marker = new google.maps.Marker({
 				position: myLocation,
 				map: map,
 				title: 'Olá Mundo'
 			});
+			this.marker = marker;
+		}*/
+		if (typeof(this.marker) == "undefined") {
+			var marker = new google.maps.Marker({
+				position: myLocation,
+				map: map,
+				title: 'Meu Ponto'
+			});
+			this.marker = marker;
+		} else {
+			this.marker.setMap(null);
+			var marker = new google.maps.Marker({
+				position: myLocation,
+				map: map,
+				title: 'Meu Ponto'
+			});
+			this.marker = marker;
 		}
 		
 		var otherMarkers
@@ -142,6 +162,7 @@ var app = {
 					localStorage.setItem("PlayerID", field.PlayerID);
 					localStorage.setItem("MatchID", field.MatchID);
 					localStorage.setItem("MapID", field.MapID);
+					app.getPosition();
 				} else {
 					$("#logCreateMatch").html(":o Erro...Tente Novamente");
 				}
@@ -166,6 +187,7 @@ var app = {
 					localStorage.setItem("MatchID", field.MatchID);
 					localStorage.setItem("MapID", field.MapID);
 					$.mobile.changePage("#map_page");
+					app.getPosition();
 				} else {
 					app.onErrorMsg(field.error);
 				}
@@ -218,7 +240,6 @@ var app = {
 	},
 	onDrawMap: function(map, points){
 		//Definir LatLng dos poligonos, sentido horário
-		console.log(points);
 		var fieldAreaCoords = eval('(' + points + ')');
 		$.each(fieldAreaCoords, function(index, val){
 			val.lat = Number(val.lat);
@@ -233,9 +254,30 @@ var app = {
 			fillColor: '#FF0000',
 			fillOpacity: 0.35
 		});
-		fieldArea.setMap(map);	
+		fieldArea.setMap(map);
 	},
 	onExitMatch: function() {
 		$.mobile.changePage("#home");
+	},
+	onDefineDrawMap: function() {
+		//Define se o mapa está criado
+		localStorage.setItem("hasMap",1);
+		console.log('You Create map');
+	},
+	onRemoveDrarMap: function() {
+		//Tira o mapa da jogada
+		localStorage.setItem("hasMap",0);
+		console.log('You Destroy Map');
+	},
+	onHasMap: function() {
+		//Checa o status do mapa
+		var statusMap = String(localStorage.getItem("hasMap"));
+		if (statusMap = '1') {
+			console.log("Have Map");
+			return true;
+		} else {
+			console.log("Don't have map");
+			return false;
+		}
 	}
 };
