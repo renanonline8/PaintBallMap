@@ -301,7 +301,6 @@ var app = {
 			localStorage.setItem('playerLng', actualLng);
 			$('#lat').text(position.coords.latitude);
 			$('#lng').text(position.coords.longitude);
-			alert('lat: ' + position.coords.latitude + "/lng: " + position.coords.longitude);
 		}
 	},
 	sendPositionError: function(error) {
