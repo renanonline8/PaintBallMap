@@ -1,0 +1,18 @@
+{
+    "android": {
+        "release": {
+            "keystore": "paintballmap-key.keystore",
+            "storePassword": "ad23ol12",
+            "alias": "paintballmap",
+            "password" : "ad23ol12",
+            "keystoreType": ""
+        },
+		"debug": {
+            "keystore": "paintballmap-realease.keystore",
+            "storePassword": "ad23ol12",
+            "alias": "paintballmap",
+            "password" : "ad23ol12",
+            "keystoreType": ""
+		}
+    }
+}

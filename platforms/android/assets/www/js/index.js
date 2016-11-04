@@ -130,14 +130,14 @@ var app = {
 		}
 		
 		var otherMarkers
-		google.maps.event.addListenerOnce(map, 'idle', function(){
+		/*google.maps.event.addListenerOnce(map, 'idle', function(){
 			otherMarkers = new app.onCreateMarkers(map);
 			$(document).on('click','#refreshPosition',function(){
 				app.onClearMarkers(marker, otherMarkers.otherMarkers, map);
 				app.getPosition();
 				app.sendPosition();
 			});
-		});
+		});*/
     },
     // unsuccessfully determined position
     onError: function (error) {
@@ -165,7 +165,8 @@ var app = {
 					localStorage.setItem("MatchID", field.MatchID);
 					localStorage.setItem("MapID", field.MapID);
 					app.removePositionMemory();
-					app.getPosition();
+					//app.getPosition();
+					app.onStartMatch();
 					app.sendPosition();
 				} else {
 					$("#logCreateMatch").html(":o Erro...Tente Novamente");
@@ -190,10 +191,11 @@ var app = {
 					localStorage.setItem("PlayerID", field.PlayerID);
 					localStorage.setItem("MatchID", field.MatchID);
 					localStorage.setItem("MapID", field.MapID);
-					$.mobile.changePage("#map_page");
 					app.removePositionMemory();
-					app.getPosition();
+					//app.getPosition();
+					app.onStartMatch();
 					app.sendPosition();
+					$.mobile.changePage("#map_page");
 				} else {
 					app.onErrorMsg(field.error);
 				}
@@ -264,7 +266,7 @@ var app = {
 	},
 	onExitMatch: function() {
 		$.mobile.changePage("#home");
-		this.removePositionMemory()
+		app.removePositionMemory()
 	},
 	onDefineDrawMap: function() {
 		//Define se o mapa está criado
@@ -319,5 +321,120 @@ var app = {
 		jqInsCurrentPosition.complete(function(data){
 			console.log('Informação Enviada');
 		});	
+	},
+	onStartMatch: function(){
+		//Pegar posição
+		navigator.geolocation.getCurrentPosition(function(position){
+			//Pegar posição lat e lng
+			var playerLat = position.coords.latitude;
+			var playerLng = position.coords.longitude;
+			var playerID = localStorage.getItem("PlayerID");
+			var markers = [];
+			app.sendPositionServer(playerID, playerLat, playerLng);
+			//Criar mapa
+			var myLocation = new google.maps.LatLng(playerLat, playerLng);
+			map = new google.maps.Map(document.getElementById('map'), {
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				center: myLocation,
+				zoom: 100
+			});
+			//Criar mapa
+			app.onCreateMap(map, playerID);
+			//Criar meu marker
+			app.onCreateMyMarker(map, myLocation, markers);
+			//Criar outros markers
+			app.onOthersMarkersMatch(map, markers);
+			//Quando clicar no botão atualiza
+			console.log(markers);
+			$(document).on('click','#refreshPosition', function(){
+				app.removeAllMarkers(map, markers);
+				markers = [];
+				navigator.geolocation.getCurrentPosition(function(position){
+					var playerLat = position.coords.latitude;
+					var playerLng = position.coords.longitude;
+					var playerID = localStorage.getItem("PlayerID");
+					var myLocation = new google.maps.LatLng(playerLat, playerLng);
+					app.sendPositionServer(playerID, playerLat, playerLng);
+					app.onCreateMyMarker(map, myLocation, markers);
+					app.onOthersMarkersMatch(map, markers);
+				}, function(error){
+					alert("Deu erro!" + error.code);	
+				});
+			
+			});
+		}, function(error){
+			alert("Deu erro!" + error.code);
+		});
+	},
+	onCreateMap: function(map, playerID){
+		//Desenhar limite do mapa
+		var url = "http://paintballmap.azurewebsites.net/api/getMapMatch.php?PlayerID=" + playerID;
+		var mapIDBD;
+		var jqxhr = $.getJSON(url,function(result){
+			$.each(result, function(key, field){
+				mapIDBD = field.MapID;
+			});
+		});
+		jqxhr.complete(function(){
+			var mapID = localStorage.getItem("MapID");
+			if (mapIDBD != mapID) {
+				localStorage.setItem("MapID", mapIDBD);
+				mapID = localStorage.getItem("MapID");
+			}
+			var hasMap = true;
+			if (mapID == null){
+				hasMap = false;
+			}
+			var url = "http://paintballmap.azurewebsites.net/api/getMapLatLng.php?MapID=" + mapID;
+			var jqxhrHasMap = $.getJSON(url, function(data){
+				return data;
+			});
+			jqxhrHasMap.complete(function(){
+				if(jqxhrHasMap.responseText == '[]')
+					hasMap = false;
+				if (hasMap == true) {
+					var matchMap = new app.onDrawMap(map, jqxhrHasMap.responseText);
+				}
+			});
+		});
+	},
+	onCreateMyMarker: function(map, myLocation, markers){
+		var marker = new google.maps.Marker({
+			position: myLocation,
+			map: map,
+			title: 'Meu Ponto'
+		});
+		markers.push(marker);
+	},
+	onOthersMarkersMatch: function(map, markers){
+		google.maps.event.addListenerOnce(map, 'idle', function(map){
+			var matchID = localStorage.getItem('MatchID');
+			var playerID = localStorage.getItem('PlayerID');
+			var url = "http://paintballmap.azurewebsites.net/api/getPosition.php?MatchId=" + matchID + "&PlayerID=" + playerID;
+			$.getJSON(url,function(result){
+				$.each(result, function(i, field) {
+					var otherP = field.PlayerID;
+					var otherPnick = field.Nickname;
+					var otherPlat = field.Latitude;
+					var otherPlon = field.Longitude;
+					var otherMark = new google.maps.Marker({
+						position: {lat:Number(otherPlat), lng:Number(otherPlon)},
+						map: map,
+						icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'				
+					});
+					markers.push(otherMark);
+				});
+			});
+		});
+	},
+	onAtualizaMapa: function(map, markers){
+		//Remove all markers
+		//Createm my marker
+		//Create others markers	
+	},
+	removeAllMarkers: function(map, markers){
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setMap(null);
+		}
 	}
 };

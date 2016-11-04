@@ -38,7 +38,7 @@
                     <input type="number" name="id_map" id="id_map" />
                     <input type="button" value="Gerar Partida" id="btnNewMatch"/>
                     <label for="id_partida">Id Partida</label>
-                    <input type="text" name="new_id_partida" id="new_id_partida" />
+                    <input type="text" name="new_id_partida" id="new_id_partida" disabled="disabled" readonly />
                     <a href="#map_page" class="ui-btn">Iniciar Partida</a>
                 </form>
             </div>
@@ -66,6 +66,7 @@
             <div data-role="main" class="ui-content">
                	<div id="map" style="width: 100%; height: 320px;">
                 </div>
+                <p>Lat <span id="lat">x</span> / Lng: <span id="lng">x</span></p>
                 <input type="button" id="refreshPosition" value="Atualiza Posição" />
             	<input type="button" id="exitMatch" value="Sair" />
         	</div>
