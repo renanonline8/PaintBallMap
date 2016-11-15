@@ -41,112 +41,9 @@ var app = {
 		//app.getPosition();
 		this.matchs();
     },
-	getPosition: function() {
-		this.teste = 'teste';
-		var options = {
-    		timeout: 30000
-		};
-		navigator.geolocation.getCurrentPosition(app.onSuccess, app.onError, options);
-	},
-    // successfully determined position
-    onSuccess: function (position) {
-        var lat = position.coords.latitude;
-        var lng = position.coords.longitude;
-		var playerID = localStorage.getItem("PlayerID");
-		var mapID = this.mapID;
-		this.mapID = localStorage.getItem("MapID");
-		var wasDrawMap = this.wasDrawMap;
-		app.sendPositionServer(playerID, lat, lng);
-		/*var url = "http://paintballmap.azurewebsites.net/api/updatePosition.php?PlayerID="+playerID+"&latitude="+lat+"&longitude="+lng;
-		var jqCurrentPosition = $.getJSON(url, function(data){});
-		jqCurrentPosition.fail(function(){
-			alert('Sem conexão com o servidor');
-		});
-		jqCurrentPosition.complete(function(data){
-			console.log('Informação Enviada');
-		});*/		        
-		// initializes the map
-        var myLocation = new google.maps.LatLng(lat, lng);
-		map = new google.maps.Map(document.getElementById('map'), {
-			mapTypeId: google.maps.MapTypeId.ROADMAP,
-			center: myLocation,
-			zoom: 100
-		});		
-		var url = "http://paintballmap.azurewebsites.net/api/getMapMatch.php?PlayerID=" + playerID;
-		var mapIDBD;
-		var jqxhr = $.getJSON(url,function(result){
-			$.each(result, function(key, field){
-				mapIDBD = field.MapID;
-			});
-		});
-		jqxhr.complete(function(){
-			if (mapIDBD != this.mapID) {
-				localStorage.setItem("MapID", mapIDBD);
-				this.mapID = localStorage.getItem("MapID");
-			}
-			var hasMap = true;
-			if (this.mapID == null){
-				hasMap = false;
-			}
-			var url = "http://paintballmap.azurewebsites.net/api/getMapLatLng.php?MapID=" + this.mapID;
-			var jqxhrHasMap = $.getJSON(url, function(data){
-				return data;
-			});
-			jqxhrHasMap.complete(function(){
-				if(jqxhrHasMap.responseText == '[]')
-					hasMap = false;
-				if (hasMap == true) {
-					if (typeof(this.matchMap) == "undefined") {
-						var matchMap = new app.onDrawMap(map, jqxhrHasMap.responseText);
-					} else {
-						//...
-					}
-				}
-			});
-		});	
-		/*if (typeof(marker) == "undefined") {
-			var marker = new google.maps.Marker({
-				position: myLocation,
-				map: map,
-				title: 'Olá Mundo'
-			});
-			this.marker = marker;
-		}*/
-		if (typeof(this.marker) == "undefined") {
-			var marker = new google.maps.Marker({
-				position: myLocation,
-				map: map,
-				title: 'Meu Ponto'
-			});
-			this.marker = marker;
-		} else {
-			this.marker.setMap(null);
-			var marker = new google.maps.Marker({
-				position: myLocation,
-				map: map,
-				title: 'Meu Ponto'
-			});
-			this.marker = marker;
-		}
-		
-		var otherMarkers
-		/*google.maps.event.addListenerOnce(map, 'idle', function(){
-			otherMarkers = new app.onCreateMarkers(map);
-			$(document).on('click','#refreshPosition',function(){
-				app.onClearMarkers(marker, otherMarkers.otherMarkers, map);
-				app.getPosition();
-				app.sendPosition();
-			});
-		});*/
-    },
-    // unsuccessfully determined position
-    onError: function (error) {
-        alert(error.message);
-    },
 	matchs: function() {
 		$(document).on('click','#btnNewMatch', this.onCreateMatchGET);
 		$(document).on('click','.btnEnterMatch', this.onEnterMatch);
-		$(document).on('click','#exitMatch', app.onExitMatch);
 	},
 	onCreateMatchGET: function() {
 		var idMapa = $('#id_map').val();
@@ -161,13 +58,16 @@ var app = {
 				if (field.error == 0) {
 					$("#logCreateMatch").html(":) Partida Criada");
 					$('#new_id_partida').val(field.MatchID);
+					$('#id_thisMatch').val(field.ThisMatchID);
 					localStorage.setItem("PlayerID", field.PlayerID);
 					localStorage.setItem("MatchID", field.MatchID);
 					localStorage.setItem("MapID", field.MapID);
 					app.removePositionMemory();
+					var watchId = null;
+					app.sendPosition();
 					//app.getPosition();
 					app.onStartMatch();
-					app.sendPosition();
+					
 				} else {
 					$("#logCreateMatch").html(":o Erro...Tente Novamente");
 				}
@@ -188,13 +88,15 @@ var app = {
 				if (field.error == 0) {
 					$("#logEnterMatch").html(":) Partida Valida");
 					$('#new_id_partida').val(field.MatchID);
+					$('#id_thisMatchEnter').val(field.ThisMatchID);
 					localStorage.setItem("PlayerID", field.PlayerID);
 					localStorage.setItem("MatchID", field.MatchID);
 					localStorage.setItem("MapID", field.MapID);
 					app.removePositionMemory();
 					//app.getPosition();
-					app.onStartMatch();
+					var watchId = null;
 					app.sendPosition();
+					app.onStartMatch();
 					$.mobile.changePage("#map_page");
 				} else {
 					app.onErrorMsg(field.error);
@@ -212,6 +114,9 @@ var app = {
 				break;
 			case '3':
 				$("#logEnterMatch").html(":o Servidor indisponível");
+				break;
+			case '4':
+				$("#logEnterMatch").html(":o Partida está lotada");
 		}
 		return false;
 	},
@@ -264,10 +169,6 @@ var app = {
 		});
 		fieldArea.setMap(map);
 	},
-	onExitMatch: function() {
-		$.mobile.changePage("#home");
-		app.removePositionMemory()
-	},
 	onDefineDrawMap: function() {
 		//Define se o mapa está criado
 		localStorage.setItem("hasMap",1);
@@ -290,9 +191,10 @@ var app = {
 		}
 	},
 	sendPosition: function() {
-		var watchId = navigator.geolocation.watchPosition(this.sendPositionSuccess,this.sendPositionError);
+		watchId = navigator.geolocation.watchPosition(this.sendPositionSuccess,this.sendPositionError);
 	},
 	sendPositionSuccess: function(position) {
+		console.log('vivo');
 		actualLat = position.coords.latitude;
 		actualLng = position.coords.longitude;
 		oldLat = localStorage.getItem('playerLat');
@@ -331,6 +233,7 @@ var app = {
 			var playerID = localStorage.getItem("PlayerID");
 			var markers = [];
 			app.sendPositionServer(playerID, playerLat, playerLng);
+			console.log(watchId);
 			//Criar mapa
 			var myLocation = new google.maps.LatLng(playerLat, playerLng);
 			map = new google.maps.Map(document.getElementById('map'), {
@@ -344,8 +247,15 @@ var app = {
 			app.onCreateMyMarker(map, myLocation, markers);
 			//Criar outros markers
 			app.onOthersMarkersMatch(map, markers);
+			//Colocar jogadores na aba log
+			app.onGetPlayers(localStorage.getItem('MatchID'),4,'#div_players');
 			//Quando clicar no botão atualiza
 			console.log(markers);
+			//Ao clicar em eliminado
+			$(document).on('click', '#exitMatch', function(){
+				app.onExitMatch(playerID);
+			});
+			//Atualiza posição
 			$(document).on('click','#refreshPosition', function(){
 				app.removeAllMarkers(map, markers);
 				markers = [];
@@ -357,11 +267,12 @@ var app = {
 					app.sendPositionServer(playerID, playerLat, playerLng);
 					app.onCreateMyMarker(map, myLocation, markers);
 					app.onOthersMarkersMatch(map, markers);
+					app.onGetPlayers(localStorage.getItem('MatchID'),4,'#div_players');
 				}, function(error){
 					alert("Deu erro!" + error.code);	
 				});
-			
 			});
+			
 		}, function(error){
 			alert("Deu erro!" + error.code);
 		});
@@ -436,5 +347,47 @@ var app = {
 		for (var i = 0; i < markers.length; i++) {
 			markers[i].setMap(null);
 		}
+	},
+	onGetPlayers: function(matchId, playersPerColumn, placeInfo){
+		//Apagar div_players atual
+		var div = $(placeInfo);
+		div.empty();
+		
+		//Obter Jogadores no banco via Ajax
+		var url = 'http://paintballmap.azurewebsites.net/api/getPlayers.php?MatchId='+matchId;
+		
+		$.getJSON(url,function(result) {
+			//Desenhar lista de jogadores
+			var nRegColumn = 1;
+			div.append('<div class="w3-col s6">');
+			$.each(result,function(i,field){
+				div.append('<p id=player_' + field.ThisMatchID + ' class="player">' + field.ThisMatchID + ' - ' + field.Nickname + '</p');
+				nRegColumn++;
+				if(nRegColumn > playersPerColumn) {
+					nRegColumn = 1;
+					div.append('</div><div class="w3-col s6">');
+				}
+			});
+			
+		});
+	},
+	onExitMatch: function(playerID){
+		//Apagar do banco
+		
+		var url = 'http://paintballmap.azurewebsites.net/api/exitMatch.php?PlayerId='+playerID;
+		$.ajax({
+			url : url,
+			type: 'GET',
+			success: function(){
+				localStorage.setItem('MapID','');
+				localStorage.setItem('MatchID','');
+				localStorage.setItem('PlayerID','');
+				localStorage.setItem('PlayerLat','');
+				localStorage.setItem('PlayerLng','');
+				navigator.geolocation.clearWatch(watchId);
+				$.mobile.changePage("#home");
+				console.log('eliminado');
+			}
+		});
 	}
 };

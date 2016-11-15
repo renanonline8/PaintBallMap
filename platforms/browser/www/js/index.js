@@ -353,6 +353,7 @@ var app = {
 					var playerLat = position.coords.latitude;
 					var playerLng = position.coords.longitude;
 					var playerID = localStorage.getItem("PlayerID");
+					var myLocation = new google.maps.LatLng(playerLat, playerLng);
 					app.sendPositionServer(playerID, playerLat, playerLng);
 					app.onCreateMyMarker(map, myLocation, markers);
 					app.onOthersMarkersMatch(map, markers);

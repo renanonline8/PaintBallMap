@@ -5,6 +5,7 @@
     <link rel="Stylesheet" type="text/css" href="css/jqx.base.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons-1.4.5.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/w3.css" />
     <style type="text/css">
         .label
         {
@@ -39,6 +40,8 @@
                     <input type="button" value="Gerar Partida" id="btnNewMatch"/>
                     <label for="id_partida">Id Partida</label>
                     <input type="text" name="new_id_partida" id="new_id_partida" disabled="disabled" readonly />
+                    <label for="id_thisMatch">Seu ID:</label>
+                    <input type="text" name="id_thisMatch" id="id_thisMatch" disabled="disabled" readonly="readonly" />
                     <a href="#map_page" class="ui-btn">Iniciar Partida</a>
                 </form>
             </div>
@@ -55,20 +58,38 @@
                     <input type="text" name="nickname2" id="nickname2" />
                     <label for="matchID">Id Partida</label>
                     <input type="text" name="matchID" id="matchID" />
+                    <label for="id_thisMatchEnter">Seu ID:</label>
+                    <input type="text" name="id_thisMatchEnter" id="id_thisMatchEnter" disabled="disabled" readonly="readonly" />
                     <input type="button" class="btnEnterMatch" value="Entrar Partida" />
                 </form>
             </div>
         </div>
-        <div id="map_page" data-role="page">
+        <div id="map_page" data-role="page"><!-- map_page -->
         	<div data-role="header">
             	<h1>PaintBall Map</h1>
             </div>
             <div data-role="main" class="ui-content">
-               	<div id="map" style="width: 100%; height: 320px;">
+            	<ul class="w3-navbar">
+                	<li><a href="javascript:void(0)" onclick="openTab('tabmap_map')">Mapa</a></li>
+                    <li><a href="javascript:void(0)" onclick="openTab('tabmap_logs')">Logs</a></li>
+                </ul>
+            	<div id="tabmap_map" class="tabmap">
+               		<div id="map" style="width: 100%; height: 320px;">
+                	</div>
+                	<p>Lat <span id="lat">x</span> / Lng: <span id="lng">x</span></p>
                 </div>
-                <p>Lat <span id="lat">x</span> / Lng: <span id="lng">x</span></p>
-                <input type="button" id="refreshPosition" value="Atualiza Posição" />
-            	<input type="button" id="exitMatch" value="Sair" />
+                <div id="tabmap_logs" class="tabmap">
+                	<div id="div_players" class="w3-row">
+                    </div>
+                </div>
+                <div class="w3-row">
+                	<div class="w3-col s6">
+                		<input type="button" id="refreshPosition" value="Atualiza Posição" />
+                    </div>
+                    <div class="w3-col s6">
+            			<input type="button" id="exitMatch" value="Sair" />
+                    </div>
+                </div>
         	</div>
         </div>
     </div>
@@ -77,6 +98,7 @@
 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="js/ui-scripts.js"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHM-kUpPsclu5uMRxNEoERh0t-bnfiMTI&sensor=false"></script>
 <script type="text/javascript">
 	$(document).ready(function () {

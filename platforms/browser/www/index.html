@@ -5,6 +5,7 @@
     <link rel="Stylesheet" type="text/css" href="css/jqx.base.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons-1.4.5.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/w3.css" />
     <style type="text/css">
         .label
         {
@@ -15,7 +16,7 @@
 </head>
 <body>
     <div class="app">
-    	<div id="home" data-role="page">
+    	<div id="old_home" data-role="page">
         	<div data-role="header">
             	<h1>PaintBall Map</h1>
             </div>
@@ -59,14 +60,23 @@
                 </form>
             </div>
         </div>
-        <div id="map_page" data-role="page">
+        <div id="home" data-role="page"><!-- map_page -->
         	<div data-role="header">
             	<h1>PaintBall Map</h1>
             </div>
             <div data-role="main" class="ui-content">
-               	<div id="map" style="width: 100%; height: 320px;">
+            	<ul class="w3-navbar">
+                	<li><a href="javascript:void(0)" onclick="openTab('tabmap_map')">Mapa</a></li>
+                    <li><a href="javascript:void(0)" onclick="openTab('tabmap_logs')">Logs</a></li>
+                </ul>
+            	<div id="tabmap_map" class="tabmap">
+               		<div id="map" style="width: 100%; height: 320px;">
+                	</div>
+                	<p>Lat <span id="lat">x</span> / Lng: <span id="lng">x</span></p>
                 </div>
-                <p>Lat <span id="lat">x</span> / Lng: <span id="lng">x</span></p>
+                <div id="tabmap_logs" class="tabmap">
+                	<p>Teste</p>
+                </div>
                 <input type="button" id="refreshPosition" value="Atualiza Posição" />
             	<input type="button" id="exitMatch" value="Sair" />
         	</div>
@@ -77,6 +87,7 @@
 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="js/ui-scripts.js"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHM-kUpPsclu5uMRxNEoERh0t-bnfiMTI&sensor=false"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
