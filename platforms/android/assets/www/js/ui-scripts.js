@@ -1,6 +1,4 @@
 // UI scripts
-openTab("London");
-
 function openTab(tabName){
 	var i;
 	var x = document.getElementsByClassName("tabmap");

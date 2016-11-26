@@ -1,4 +1,5 @@
 <?php
+	//GET nickname, map_ID
 	header("Access-Control-Allow-Origin: *");
 	include_once('db.php');
 
@@ -19,12 +20,12 @@
 	$nickname = $_GET['nickname'];
 	$map_ID = $_GET['idMap'];
 	
-	if (mysqli_query($conn, "INSERT INTO Matchs VALUES ('$PlayerID', '$MatchID', '$nickname', null, null, '$map_ID')")) {
-		$array = array("error" => "0", "PlayerID" => $PlayerID, "MatchID" => $MatchID, "MapID" => $map_ID);
+	if (mysqli_query($conn, "INSERT INTO Matchs VALUES ('$PlayerID', '$MatchID', '$nickname', null, null, '$map_ID', 1)")) {
+		$array = array("error" => "0", "PlayerID" => $PlayerID, "MatchID" => $MatchID, "MapID" => $map_ID, "ThisMatchID" => '1');
 		echo json_encode($array);
 	} else {
 		$array = array("error" => "1");
-		echo json_encode($map_ID);
+		echo json_encode($array);
 	}
 	mysqli_close($conn);
 ?>
